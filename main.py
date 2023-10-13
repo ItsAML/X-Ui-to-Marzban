@@ -9,6 +9,64 @@ import json
 # Define the protocol (HTTP or HTTPS)
 protocol = "https" if X_HTTPS else "http"
 
+# Detecting Persian/Arabic Words
+def contains_persian_arabic(text):
+    persian_arabic_chars = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ"
+    
+    for char in text:
+        if char in persian_arabic_chars:
+            return True
+    
+    return False
+
+
+# UserName Translater
+def transliterate_basic(text):
+    # Create a basic mapping of characters from Persian/Arabic to English
+    transliteration_map = {
+        'ا': 'a',
+        'ب': 'b',
+        'پ': 'p',
+        'ت': 't',
+        'ث': 'th',
+        'ج': 'j',
+        'چ': 'ch',
+        'ح': 'h',
+        'خ': 'kh',
+        'د': 'd',
+        'ذ': 'z',
+        'ر': 'r',
+        'ز': 'z',
+        'ژ': 'zh',
+        'س': 's',
+        'ش': 'sh',
+        'ص': 's',
+        'ض': 'z',
+        'ط': 't',
+        'ظ': 'z',
+        'ع': 'a',
+        'غ': 'gh',
+        'ف': 'f',
+        'ق': 'q',
+        'ک': 'k',
+        'گ': 'g',
+        'ل': 'l',
+        'م': 'm',
+        'ن': 'n',
+        'ه': 'h',
+        'و': 'w',
+        'ی': 'y',
+        'ئ': 'y',
+        # Add more characters as needed
+    }
+
+    # Transliterate the text
+    result = ''
+    for char in text:
+        result += transliteration_map.get(char, char)
+
+    return result
+
 # TimeStamp Converter X-UI
 def milliseconds_to_seconds(seconds):
     if seconds < 0:
@@ -67,7 +125,11 @@ def get_x_inbounds(session):
                         print("*" * 9)
                         # Extract and store user data
                         for client in client_stats:
-                            email = client["email"]
+                            raw_email = client["email"]
+                            email = contains_persian_arabic(client["email"])
+                            if email:
+                                raw_email = transliterate_basic(client["email"])
+
                             up = client["up"]
                             down = client["down"]
                             total = client["total"]
@@ -75,7 +137,7 @@ def get_x_inbounds(session):
                             if up + down <= total:
                                 last_value = total - (up + down)
                                 expiry_time = milliseconds_to_seconds(client["expiryTime"])
-                                user_data = [email, expiry_time, last_value]
+                                user_data = [raw_email, expiry_time, last_value]
                                 users.append(user_data)
                             else:
                                 # Skip storing the data
@@ -395,5 +457,4 @@ if __name__ == "__main__":
             else:
                 print("Invalid choice. Please enter 'y' or 'n'.")
 
-
-# Line #362
+# https://github.com/ItsAML
