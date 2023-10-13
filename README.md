@@ -32,7 +32,7 @@ M_HTTPS = False  # Set to True to use HTTPS, False to use HTTP
 
 ## About
 
-This script is designed to automate the management of user templates using the Marzban API. It securely logs into an admin panel, retrieves a list of user templates, adds new ones, modifies existing templates, and can also delete user templates when needed. It provides detailed logging for each operation, making it a valuable tool for efficiently managing user accounts in a web-based environment.
+This script is designed to simplify the transfer of user data from X-Ui to Marzban using the Marzban API. It securely logs into both panels, retrieves user data from X-Ui, and adds it to Marzban.
 
 ## Getting Started
 
@@ -53,14 +53,14 @@ Finally Restart The Marzban
 marzban restart
 ```
 ### Prerequisites
-Python 3.0+ with requests library required. you cant run the script on python 2.0
+Python 3.0+ with the requests library is required. The script is not compatible with Python 2.0.
 ### Linux
 ```bash
 # Clone the Repository
-git clone https://github.com/ItsAML/MarzbanUserTemplateManagment.git
+git clone https://github.com/ItsAML/X-Ui-to-Marzban.git
 
 # Change Directory
-cd MarzbanUserTemplateManagment
+cd X-Ui-to-Marzban
 
 # Install pip (if not already installed)
 wget -qO- https://bootstrap.pypa.io/get-pip.py | python3 -
@@ -74,10 +74,10 @@ python3 main.py
 ### Windows
 ```bash
 # Clone the Repository
-git clone https://github.com/ItsAML/MarzbanUserTemplateManagment.git
+git clone https://github.com/ItsAML/X-Ui-to-Marzban.git
 
 # Navigate to the Repository Directory
-cd MarzbanUserTemplateManagment
+cd X-Ui-to-Marzban
 
 # Install Python (if not already installed)
 # Download and install Python from https://www.python.org/downloads/
