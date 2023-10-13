@@ -1,6 +1,6 @@
-# Marzban User Template Manager
+# X-Ui To Marzban Migrate Script
 
- | Simply Show, Add, Modify and Delete User Templates With This Script.
+ | Simply Transfer Your Users From X-Ui to Marzban
 
 ## Table of Contents
 - [About](#about)
