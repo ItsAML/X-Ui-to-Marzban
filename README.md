@@ -9,7 +9,7 @@
 - [Linux](#Linux)
 - [Windows](#windows)
 
-Make Sure To Change these variables before runing the script.
+Before running the script, ensure you update the following variables with your specific information in config.py:
 ```python
 # Define Variables for Both Panels
 
