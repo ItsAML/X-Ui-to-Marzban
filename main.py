@@ -57,6 +57,7 @@ def transliterate_basic(text):
         'و': 'w',
         'ی': 'y',
         'ئ': 'y',
+        ' ': ''
         # Add more characters as needed
     }
 
