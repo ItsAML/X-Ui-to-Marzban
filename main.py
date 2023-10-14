@@ -12,10 +12,10 @@ protocol = "https" if X_HTTPS else "http"
 
 # Detecting Persian/Arabic Words
 def contains_persian_arabic(text):
-    persian_arabic_chars = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ"
+    characters_to_check = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ🙂😀😁😂🥰👍🙌💯🔥!@#$%^&*()_+"
     
     for char in text:
-        if char in persian_arabic_chars:
+        if char in characters_to_check:
             return True
     
     return False
