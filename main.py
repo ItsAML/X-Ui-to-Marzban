@@ -12,13 +12,12 @@ protocol = "https" if X_HTTPS else "http"
 
 # Detecting Persian/Arabic Words
 def contains_persian_arabic(text):
-    characters_to_check = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ🙂😀😁😂🥰👍🙌💯🔥!@#$%^&*()_+"
+    non_english_pattern = r'[^a-zA-Z0-9 ]'
     
-    for char in text:
-        if char in characters_to_check:
-            return True
-    
-    return False
+    if re.search(non_english_pattern, text):
+        return True  # Contains non-English characters
+    else:
+        return False  # All characters are English
 
 
 # UserName Translater
