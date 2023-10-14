@@ -5,6 +5,7 @@ import logging
 from datetime import datetime
 import time
 import json
+import re
 
 # Define the protocol (HTTP or HTTPS)
 protocol = "https" if X_HTTPS else "http"
@@ -63,7 +64,14 @@ def transliterate_basic(text):
     # Transliterate the text
     result = ''
     for char in text:
-        result += transliteration_map.get(char, char)
+        if char in transliteration_map:
+            result += transliteration_map[char]
+        elif re.match(r'[a-zA-Z0-9]', char):
+            # Keep English letters and digits as is
+            result += char
+        else:
+            # Replace special characters and emojis with underscores
+            result += '_'
 
     return result
 
