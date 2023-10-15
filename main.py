@@ -7,17 +7,29 @@ import time
 import json
 import re
 
+AML = """
+   _____      __    __     __      
+  /\___/\    /_/\  /\_\   /\_\     
+ / / _ \ \   ) ) \/ ( (  ( ( (     
+ \ \(_)/ /  /_/ \  / \_\  \ \_\    
+ / / _ \ \  \ \ \\// / /  / / /__  
+( (_( )_) )  )_) )( (_(  ( (_____( 
+ \/_/ \_\/   \_\/  \/_/   \/_____/ 
+                                   
+"""
+
 # Define the protocol (HTTP or HTTPS)
 protocol = "https" if X_HTTPS else "http"
 
 # Detecting Persian/Arabic Words
 def contains_persian_arabic(text):
-    non_english_pattern = r'[^a-zA-Z0-9 ]'
+    persian_arabic_chars = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ"
     
-    if re.search(non_english_pattern, text):
-        return True  # Contains non-English characters
-    else:
-        return False  # All characters are English
+    for char in text:
+        if char in persian_arabic_chars:
+            return True
+    
+    return False
 
 
 # UserName Translater
@@ -107,8 +119,7 @@ def x_login(session, username, password):
     else:
         print("Failed to connect to the login endpoint.")
     return False
-
-def get_x_inbounds(session):
+def get_x_inbounds_with_uuid(session):
     response = session.get(get_inbounds_url)
     
     if response.status_code == 200:
@@ -120,38 +131,52 @@ def get_x_inbounds(session):
                 
                 # Create a list to store user data
                 users = []
+                used_traffic_by_users = []
                 
                 for inbound in inbounds_list:
                     print("Inbound ID:", inbound.get("id"))
                     print("Remark:", inbound.get("remark"))
+                    print("Port:", inbound.get("port"))
+                    print("Protocol:", inbound.get("protocol"))
+                    
                     if "clientStats" in inbound:
-                        client_stats = inbound["clientStats"]
-                        
-                        # Count the number of users for this inbound
-                        num_users = len(client_stats)
-                        print("Number of Users:", num_users)
-                        print("*" * 9)
-                        # Extract and store user data
-                        for client in client_stats:
-                            raw_email = client["email"]
-                            email = contains_persian_arabic(client["email"])
-                            if email:
-                                raw_email = transliterate_basic(client["email"])
+                        client_statss = inbound["clientStats"]
+                        for each_usertraffic in client_statss:
+                            up = each_usertraffic["up"]
+                            down = each_usertraffic["down"]
+                            total_used = (up + down)
+                            used_traffic_by_users.append(total_used)
 
-                            up = client["up"]
-                            down = client["down"]
-                            total = client["total"]
-                            # Check if (up + down) is greater than total
-                            if up + down <= total:
-                                last_value = total - (up + down)
-                                expiry_time = milliseconds_to_seconds(client["expiryTime"])
-                                user_data = [raw_email, expiry_time, last_value]
-                                users.append(user_data)
-                            else:
-                                # Skip storing the data
-                                print("User skipped due to (up + down) greater than total")
-                    else:
-                        print("No Clients Found.")
+                    # Extract "settings" and "clients" data
+                    settings = json.loads(inbound["settings"])
+                    client_stats = settings.get("clients", [])
+
+                    # Count the number of users for this inbound
+                    num_users = len(client_stats)
+                    print("Number of Users:", num_users)
+                    print("*" * 9)
+                    
+                    # Extract and store user data
+                    for client, used_traffic in zip(client_stats, used_traffic_by_users):
+                        raw_email = client["email"]
+                        email = contains_persian_arabic(client["email"])
+                        if email:
+                            raw_email = transliterate_basic(client["email"])
+
+                        total = client["totalGB"]
+                        protocol = inbound.get("protocol")
+                        
+                        # Check if used_traffic is greater than total
+                        if used_traffic <= total:
+                            last_value = total - (used_traffic)
+                            expiry_time = milliseconds_to_seconds(client["expiryTime"])
+                            
+                            # Append the client data to the users list
+                            user_data = [protocol, client["id"], raw_email, expiry_time, last_value]
+                            users.append(user_data)
+                        else:
+                            # Skip storing the data
+                            print("User skipped due to used traffic greater than total, AKA Limited")
                 
                 # Return the list of user data for later use
                 return users
@@ -162,7 +187,6 @@ def get_x_inbounds(session):
             print("Failed to get inbounds. Error message:", inbounds_response.get("msg"))
     else:
         print("Failed to connect to the get inbounds endpoint.")
-
 def m_login(session,username, password):
     use_protocol = 'https' if M_HTTPS else 'http'
     url = f'{use_protocol}://{M_DOMAIN}:{M_PORT}/api/admin/token'
@@ -199,7 +223,7 @@ def get_m_inbounds(session,access_token):
         logging.error(f'Error occurred while retrieving inbounds: {e}')
         return None
 
-def add_m_user(session, access_token, email, traffic, expiretime, inbounds):
+def add_m_user(session, access_token,protocoll, uuid, email, traffic, expiretime, inbounds):
     use_protocol = 'https' if M_HTTPS else 'http'
     url = f'{use_protocol}://{M_DOMAIN}:{M_PORT}/api/user'
     data = {
@@ -234,6 +258,28 @@ def add_m_user(session, access_token, email, traffic, expiretime, inbounds):
         data["proxies"]["vless"]["flow"] = "xtls-rprx-vision"
     except Exception as e:
         pass
+    if protocoll == "vmess":
+        try:
+            data["proxies"]["vmess"]["id"] = uuid
+        except Exception as e:
+            pass
+    elif protocoll == "vless":
+        try:
+            data["proxies"]["vless"]["id"] = uuid
+        except Exception as e:
+            pass
+    elif protocoll == "trojan":
+        try:
+            data["proxies"]["trojan"]["id"] = uuid
+        except Exception as e:
+            pass
+    elif protocoll == "shadowsocks":
+        try:
+            data["proxies"]["shadowsocks"]["id"] = uuid
+        except Exception as e:
+            pass
+    
+    
 
     headers = {
         "accept": "application/json",
@@ -252,7 +298,7 @@ def add_m_user(session, access_token, email, traffic, expiretime, inbounds):
         logging.error(f'Error occurred while adding user: {e}')
         return None
 
-def add_m_custom_user(session, access_token, email, traffic, expiretime, inbounds, flow):
+def add_m_custom_user(session, access_token,protocoll, uuid, email, traffic, expiretime, inbounds, flow):
     use_protocol = 'https' if M_HTTPS else 'http'
     url = f'{use_protocol}://{M_DOMAIN}:{M_PORT}/api/user'
     data = {
@@ -287,7 +333,27 @@ def add_m_custom_user(session, access_token, email, traffic, expiretime, inbound
             data["proxies"]["vless"]["flow"] = "xtls-rprx-vision"
         except Exception as e:
             pass
-
+    if protocoll == "vmess":
+        try:
+            data["proxies"]["vmess"]["id"] = uuid
+        except Exception as e:
+            pass
+    elif protocoll == "vless":
+        try:
+            data["proxies"]["vless"]["id"] = uuid
+        except Exception as e:
+            pass
+    elif protocoll == "trojan":
+        try:
+            data["proxies"]["trojan"]["id"] = uuid
+        except Exception as e:
+            pass
+    elif protocoll == "shadowsocks":
+        try:
+            data["proxies"]["shadowsocks"]["id"] = uuid
+        except Exception as e:
+            pass
+    
     try:
         #print(json.dumps(data, indent=4))
         response = session.post(url, json=data, headers=headers)
@@ -300,8 +366,8 @@ def add_m_custom_user(session, access_token, email, traffic, expiretime, inbound
 
 def add_m_users(session, access_token, users, inbound_names):
     for user in users:
-        email, expiretime, traffic = user
-        user_status = add_m_user(session, access_token, email, traffic, expiretime, inbound_names)
+        protocoll, uuid, email, expiretime, traffic = user
+        user_status = add_m_user(session, access_token, protocoll, uuid, email, traffic, expiretime, inbound_names)
         if user_status:
             print(f"User {email} added successfully.")
         else:
@@ -309,8 +375,8 @@ def add_m_users(session, access_token, users, inbound_names):
 
 def add_m_custom_users(session, access_token, users, inbound_names, flow):
     for user in users:
-        email, expiretime, traffic = user
-        user_status = add_m_custom_user(session, access_token, email, traffic, expiretime, inbound_names, flow)
+        protocoll, uuid, email, expiretime, traffic = user
+        user_status = add_m_custom_user(session, access_token, protocoll, uuid, email, traffic, expiretime, inbound_names, flow)
         if user_status:
             print(f"User {email} added successfully.")
         else:
@@ -320,8 +386,9 @@ if __name__ == "__main__":
     # Making Session For Each API
     X_SESSION = requests.Session()
     M_SESSION = requests.Session()
+    print(AML)
     if x_login(X_SESSION, X_USERNAME, X_PASSWORD):
-        user_data = get_x_inbounds(X_SESSION)
+        user_data = get_x_inbounds_with_uuid(X_SESSION)
         while True:
             choice = input("Do you wanna proceed to transfer users To Marzban? (y/n): ").strip().lower()
             
