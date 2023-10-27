@@ -23,7 +23,7 @@ protocol = "https" if X_HTTPS else "http"
 
 # Detecting Persian/Arabic Words
 def contains_persian_arabic(text):
-    persian_arabic_chars = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ"
+    persian_arabic_chars = " ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ"
     
     for char in text:
         if char in persian_arabic_chars:
@@ -82,8 +82,8 @@ def transliterate_basic(text):
             # Keep English letters and digits as is
             result += char
         else:
-            # Replace special characters and emojis with underscores
-            result += '_'
+            # Replace special characters and emojis with empty strings
+            result += ''
 
     return result
 
