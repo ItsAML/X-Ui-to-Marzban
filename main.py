@@ -3,9 +3,10 @@ import requests
 from config import *
 import logging
 from datetime import datetime
-import time
 import json
 import re
+import unicodedata
+
 
 AML = """
    _____      __    __     __      
@@ -21,12 +22,28 @@ AML = """
 # Define the protocol (HTTP or HTTPS)
 protocol = "https" if X_HTTPS else "http"
 
+def validate_username(username):
+    # Convert non-ASCII characters to ASCII
+    username = unicodedata.normalize('NFKD', username).encode('ascii', 'ignore').decode()
+
+    # Remove any non-alphanumeric characters except underscores
+    username = re.sub(r'[^a-zA-Z0-9_]', '', username)
+
+    # Limit the username length between 3 to 32 characters
+    username = username[:32] if len(username) > 32 else username
+    username = username if len(username) >= 3 else username.ljust(3, '_')
+
+    return username
+
+
 # Detecting Persian/Arabic Words
-def contains_persian_arabic(text):
-    persian_arabic_chars = " ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ"
+def contains_non_english(text):
+    persian_arabic_chars = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنهویئ"
+    russian_chars = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+    chinese_chars = "的一是不了在人有我他这个中大来上为和国时要以就用们生下作地子出年前同经所自多面发后新学本动因其种美但间由两并还过手心只用天"
     
     for char in text:
-        if char in persian_arabic_chars:
+        if char in persian_arabic_chars or char in russian_chars or char in chinese_chars:
             return True
     
     return False
@@ -36,41 +53,30 @@ def contains_persian_arabic(text):
 def transliterate_basic(text):
     # Create a basic mapping of characters from Persian/Arabic to English
     transliteration_map = {
-        'ا': 'a',
-        'ب': 'b',
-        'پ': 'p',
-        'ت': 't',
-        'ث': 'th',
-        'ج': 'j',
-        'چ': 'ch',
-        'ح': 'h',
-        'خ': 'kh',
-        'د': 'd',
-        'ذ': 'z',
-        'ر': 'r',
-        'ز': 'z',
-        'ژ': 'zh',
-        'س': 's',
-        'ش': 'sh',
-        'ص': 's',
-        'ض': 'z',
-        'ط': 't',
-        'ظ': 'z',
-        'ع': 'a',
-        'غ': 'gh',
-        'ف': 'f',
-        'ق': 'q',
-        'ک': 'k',
-        'گ': 'g',
-        'ل': 'l',
-        'م': 'm',
-        'ن': 'n',
-        'ه': 'h',
-        'و': 'w',
-        'ی': 'y',
-        'ئ': 'y',
-        ' ': ''
-        # Add more characters as needed
+    # Persian
+    'آ': 'a', 'ا': 'a', 'ب': 'b', 'پ': 'p', 'ت': 't', 'ث': 's', 'ج': 'j', 'چ': 'ch',
+    'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'z', 'ر': 'r', 'ز': 'z', 'ژ': 'zh', 'س': 's',
+    'ش': 'sh', 'ص': 's', 'ض': 'z', 'ط': 't', 'ظ': 'z', 'ع': 'a', 'غ': 'gh', 'ف': 'f',
+    'ق': 'gh', 'ک': 'k', 'گ': 'g', 'ل': 'l', 'م': 'm', 'ن': 'n', 'و': 'o', 'ه': 'h',
+    'ی': 'i', 'ئ': 'y',
+
+    # Russian (Cyrillic to Latin)
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
+    'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
+    'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts',
+    'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu',
+    'я': 'ya',
+
+    # Chinese (Simplified to Pinyin)
+    '的': 'de', '一': 'yi', '是': 'shi', '不': 'bu', '了': 'le', '在': 'zai', '人': 'ren', '有': 'you',
+    '我': 'wo', '他': 'ta', '这': 'zhe', '个': 'ge', '中': 'zhong', '大': 'da', '来': 'lai', '上': 'shang',
+    '为': 'wei', '和': 'he', '国': 'guo', '时': 'shi', '要': 'yao', '以': 'yi', '就': 'jiu', '用': 'yong',
+    '们': 'men', '生': 'sheng', '下': 'xia', '作': 'zuo', '地': 'di', '为': 'wei', '子': 'zi', '出': 'chu',
+    '年': 'nian', '前': 'qian', '同': 'tong', '经': 'jing', '所': 'suo', '自': 'zi', '多': 'duo', '面': 'mian',
+    '发': 'fa', '后': 'hou', '新': 'xin', '学': 'xue', '本': 'ben', '经': 'jing', '动': 'dong', '和': 'he',
+    '因': 'yin', '其': 'qi', '种': 'zhong', '美': 'mei', '但': 'dan', '间': 'jian', '由': 'you', '两': 'liang',
+    '并': 'bing', '还': 'hai', '过': 'guo', '手': 'shou', '心': 'xin', '只': 'zhi', '用': 'yong', '天': 'tian',
+    # Add more Chinese characters as needed...
     }
 
     # Transliterate the text
@@ -131,58 +137,56 @@ def get_x_inbounds_with_uuid(session):
                 
                 # Create a list to store user data
                 users = []
-                used_traffic_by_users = []
                 
                 for inbound in inbounds_list:
                     print("Inbound ID:", inbound.get("id"))
                     print("Remark:", inbound.get("remark"))
                     print("Port:", inbound.get("port"))
                     print("Protocol:", inbound.get("protocol"))
-                    
-                    if "clientStats" in inbound:
-                        client_statss = inbound["clientStats"]
-                        for each_usertraffic in client_statss:
-                            up = each_usertraffic["up"]
-                            down = each_usertraffic["down"]
-                            total_used = (up + down)
-                            used_traffic_by_users.append(total_used)
-
-                    # Extract "settings" and "clients" data
-                    settings = json.loads(inbound["settings"])
-                    client_stats = settings.get("clients", [])
-
+                    client_stats = inbound.get("clientStats")
                     # Count the number of users for this inbound
                     num_users = len(client_stats)
                     print("Number of Users:", num_users)
                     print("*" * 9)
-                    
-                    # Extract and store user data
-                    for client, used_traffic in zip(client_stats, used_traffic_by_users):
-                        raw_email = client["email"]
-                        email = contains_persian_arabic(client["email"])
-                        if email:
-                            raw_email = transliterate_basic(client["email"])
 
-                        total = client["totalGB"]
-                        protocol = inbound.get("protocol")
-                        
-                        # Check if used_traffic is greater than total
-                        if used_traffic <= total:
-                            last_value = total - (used_traffic)
+                    # UUID List
+                    uuid_settings = json.loads(inbound.get("settings"))
+                    uuid_stats = uuid_settings.get("clients")
+                    # Extract and store user data
+                    for client, uuid in zip(client_stats, uuid_stats):
+                        if client["enable"] == True:
+                            raw_email = client["email"]
+                            email = contains_non_english(client["email"])
+                            if email:
+                                raw_email = transliterate_basic(client["email"])
+                            raw_email = validate_username(raw_email)
+                            used_traffic = client["up"] + client["down"]
+                            total = client["total"]
+                            protocol = inbound.get("protocol")
                             expiry_time = milliseconds_to_seconds(client["expiryTime"])
-                            
-                            # Append the client data to the users list
-                            user_data = [protocol, client["id"], raw_email, expiry_time, last_value]
-                            users.append(user_data)
-                        else:
-                            # Skip storing the data
-                            print("User skipped due to used traffic greater than total, AKA Limited")
-                
+                            uuid_result = uuid["id"]
+                            # Check if used_traffic is greater than total
+                            if used_traffic <= total and total > 0:
+                                last_value = total - (used_traffic)
+                                # Append the client data to the users list
+                                user_data = [protocol, uuid_result, raw_email, expiry_time, last_value]
+                                users.append(user_data)
+                            elif total == 0:
+                                # Append the client data to the users list
+                                user_data = [protocol, uuid_result, raw_email, expiry_time, total]
+                                users.append(user_data)
+                        elif client["enable"] == False:
+                            #Skip storing the data
+                            with open('log.txt', 'w+') as file:
+                                    log_text = f'User {client["email"]} skipped: {int((client["up"] + client["down"]) / 1024 / 1024 / 1024)}GB , {client["total"] / 1024 / 1024 / 1024}GB\n'
+                                    file.write(log_text)
+                    
                 # Return the list of user data for later use
                 return users
                 
             else:
                 print("No inbounds available.")
+                return None
         else:
             print("Failed to get inbounds. Error message:", inbounds_response.get("msg"))
     else:
