@@ -178,8 +178,8 @@ def get_x_inbounds_with_uuid(session):
                         elif client["enable"] == False:
                             #Skip storing the data
                             with open('log.txt', 'w+') as file:
-                                    log_text = f'User {client["email"]} skipped: {int((client["up"] + client["down"]) / 1024 / 1024 / 1024)}GB , {client["total"] / 1024 / 1024 / 1024}GB\n'
-                                    file.write(log_text)
+                                log_text = f'User {client["email"]} skipped: {int((client["up"] + client["down"]) / 1024 / 1024 / 1024)}GB , {client["total"] / 1024 / 1024 / 1024}GB\n'
+                                file.write(log_text)
                     
                 # Return the list of user data for later use
                 return users
