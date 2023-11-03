@@ -23,15 +23,18 @@ AML = """
 protocol = "https" if X_HTTPS else "http"
 
 def validate_username(username):
+    
+    # Limit the username length between 3 to 32 characters
+    username = username[:32] if len(username) > 32 else username
+    if len(username) < 3:
+        # Append 'v2' to satisfy the minimum length
+        username = username + 'v2'
+
     # Convert non-ASCII characters to ASCII
     username = unicodedata.normalize('NFKD', username).encode('ascii', 'ignore').decode()
 
     # Remove any non-alphanumeric characters except underscores
     username = re.sub(r'[^a-zA-Z0-9_]', '', username)
-
-    # Limit the username length between 3 to 32 characters
-    username = username[:32] if len(username) > 32 else username
-    username = username if len(username) >= 3 else username.ljust(3, '_')
 
     return username
 
