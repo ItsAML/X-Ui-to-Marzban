@@ -27,14 +27,14 @@ def validate_username(username):
     # Convert non-ASCII characters to ASCII
     username = unicodedata.normalize('NFKD', username).encode('ascii', 'ignore').decode()
 
-    # Remove any non-alphanumeric characters except underscores
-    username = re.sub(r'[^a-zA-Z0-9_]', '', username)
+    # Remove any non-alphanumeric characters
+    username = re.sub(r'[^a-zA-Z0-9]', '', username)
 
-   # Limit the username length between 3 to 32 characters
+    # Limit the username length between 3 to 32 characters
     username = username[:32] if len(username) > 32 else username
     if len(username) < 3:
-        # Append 'fixed' to satisfy the minimum length
-        username = username + 'fixed'
+        # Append 'Marzban' to satisfy the minimum length
+        username = username + 'Marzban'
 
     return username
 
@@ -298,7 +298,12 @@ def add_m_user(session, access_token,protocoll, uuid, email, traffic, expiretime
         # Printing Json Data
         # print(json.dumps(data, indent=4))
         response = session.post(url,json=data, headers=headers)
-        response.raise_for_status()
+       if response.status_code == 409:
+            for i in range(3):
+                print(f"Sending Request Failed, Attempt Number {i}...")
+                response = session.post(url,json=data, headers=headers)
+                if response.status_code == 200:
+                    break
         user_status = response.json()
         return user_status
     except requests.exceptions.RequestException as e:
@@ -364,7 +369,12 @@ def add_m_custom_user(session, access_token,protocoll, uuid, email, traffic, exp
     try:
         #print(json.dumps(data, indent=4))
         response = session.post(url, json=data, headers=headers)
-        response.raise_for_status()
+       if response.status_code == 409:
+            for i in range(3):
+                print(f"Sending Request Failed, Attempt Number {i}...")
+                response = session.post(url,json=data, headers=headers)
+                if response.status_code == 200:
+                    break
         user_status = response.json()
         return user_status
     except requests.exceptions.RequestException as e:
