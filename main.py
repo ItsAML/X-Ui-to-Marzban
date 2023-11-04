@@ -295,19 +295,23 @@ def add_m_user(session, access_token,protocoll, uuid, email, traffic, expiretime
     
     
     try:
-        # Printing Json Data
-        # print(json.dumps(data, indent=4))
-        response = session.post(url,json=data, headers=headers)
-        if response.status_code == 409:
-            for i in range(3):
-                print(f"Sending Request Failed, Attempt Number {i}...")
-                response = session.post(url,json=data, headers=headers)
-                if response.status_code == 200:
-                    break
+        response = session.post(url, json=data, headers=headers)
+        response.raise_for_status()
         user_status = response.json()
         return user_status
     except requests.exceptions.RequestException as e:
         logging.error(f'Error occurred while adding user: {e}')
+        if response.status_code == 409:
+            for i in range(3):
+                print(f"Sending Request Failed,Username Already Exists, Changing Username and Trying Again. Attempt Number {i+1}...")
+                data["username"] = f"{email}{i+1}"
+                response = session.post(url,json=data, headers=headers)
+                if response.status_code == 200:
+                    print(f"Username Has Been Changed to {data['username']}")
+                    with open("username_changelog.txt", "a+") as f:
+                        f.write(f"{email} ==> {data['username']}\n")
+                    return response.json()
+                    break
         return None
 
 def add_m_custom_user(session, access_token,protocoll, uuid, email, traffic, expiretime, inbounds, flow):
@@ -367,18 +371,23 @@ def add_m_custom_user(session, access_token,protocoll, uuid, email, traffic, exp
             pass
     
     try:
-        #print(json.dumps(data, indent=4))
         response = session.post(url, json=data, headers=headers)
-        if response.status_code == 409:
-            for i in range(3):
-                print(f"Sending Request Failed, Attempt Number {i}...")
-                response = session.post(url,json=data, headers=headers)
-                if response.status_code == 200:
-                    break
+        response.raise_for_status()
         user_status = response.json()
         return user_status
     except requests.exceptions.RequestException as e:
         logging.error(f'Error occurred while adding user: {e}')
+        if response.status_code == 409:
+            for i in range(3):
+                print(f"Sending Request Failed,Username Already Exists, Changing Username and Trying Again. Attempt Number {i+1}...")
+                data["username"] = f"{email}{i+1}"
+                response = session.post(url,json=data, headers=headers)
+                if response.status_code == 200:
+                    print(f"Username Has Been Changed to {data['username']}")
+                    with open("username_changelog.txt", "a+") as f:
+                        f.write(f"{email} ==> {data['username']}\n")
+                    return response.json()
+                    break
         return None
 
 def add_m_users(session, access_token, users, inbound_names):
@@ -410,7 +419,10 @@ if __name__ == "__main__":
             choice = input("Do you wanna proceed to transfer users To Marzban? (y/n): ").strip().lower()
             
             if choice == 'y':
-                auto_manual = input("Do you want to Transfer Users by Automatic Method or Manual Method? (a/m)").strip().lower()
+                print("Do you want to Transfer Users by Automatic Method or Manual Method")
+                print("Automatic ==> Grabs Marzban Inbounds and Use All of Them To Create Users + Enable Flow For Vless Protocol")
+                print("Manual ==> Pick The Inbounds You Want To Use Them in Order To Create Users + Disable/Enable Flow For Vless Protocol\n")
+                auto_manual = input("Enter (a/m) to Continue: ").strip().lower()
                 if auto_manual == "a":
                     # Getting Marzban Inbounds for Later Use
                     token = m_login(M_SESSION, M_USERNAME, M_PASSWORD)
