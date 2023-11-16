@@ -107,7 +107,7 @@ def milliseconds_to_seconds(seconds):
 
 # Define the API endpoints
 login_url = f"{protocol}://{X_DOMAIN}:{X_PORT}/login"
-get_inbounds_url = f"{protocol}://{X_DOMAIN}:{X_PORT}/panel/api/inbounds/list"
+get_inbounds_url = {1:f"{protocol}://{X_DOMAIN}:{X_PORT}/panel/api/inbounds/list", 2:f"{protocol}://{X_DOMAIN}:{X_PORT}/xui/API/inbounds/"}.get(X_FORK, "Couldnt Find Specified Version")
 
 def x_login(session, username, password):
     login_data = {
