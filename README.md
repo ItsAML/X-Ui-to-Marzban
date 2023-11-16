@@ -19,6 +19,7 @@ X_PORT = "YOUR_PORT"
 X_USERNAME = "YOUR_USERNAME"
 X_PASSWORD = "YOUR_PASSWORD"
 X_HTTPS = False  # Set to True to use HTTPS, False to use HTTP
+X_FORK = 1 # Set to 1 if you have MHSanaie, Set to 2 if you have Alireza (Default: MHSanaie)
 
 # Marzban Panel
 
