@@ -1,4 +1,4 @@
-# [X-Ui and link](https://github.com/MHSanaei/3x-ui) To [Marzban](https://github.com/Gozargah/Marzban)
+# [X-Ui](https://github.com/MHSanaei/3x-ui) To [Marzban](https://github.com/Gozargah/Marzban)
  Migrate Script
 
  | Simply Transfer Your Users From X-Ui to Marzban
@@ -33,7 +33,7 @@ M_HTTPS = False  # Set to True to use HTTPS, False to use HTTP
 
 ## About
 
-This script is designed to simplify the transfer of user data from [X-Ui and link](https://github.com/MHSanaei/3x-ui) to [Marzban](https://github.com/Gozargah/Marzban)
+This script is designed to simplify the transfer of user data from [X-Ui](https://github.com/MHSanaei/3x-ui) to [Marzban](https://github.com/Gozargah/Marzban)
  using the Marzban API. It securely logs into both panels, retrieves user data from X-Ui, and adds it to Marzban.
 
 ### Prerequisites
