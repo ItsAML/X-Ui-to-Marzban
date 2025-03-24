@@ -156,10 +156,16 @@ def get_x_inbounds_with_uuid(session):
                     uuid_settings = json.loads(inbound.get("settings"))
                     uuid_stats = uuid_settings.get("clients")
                     # Extract and store user data
-                    for client, uuid in zip(client_stats, uuid_stats):
-                        if client["enable"] == True:
-                            raw_email = client["email"]
-                            email = contains_non_english(client["email"])
+                    uuid_dict = {uuid["email"]: uuid for uuid in uuid_stats}  # Create a dictionary mapping email to UUID data
+
+                    for client in client_stats:
+                        email = client["email"]
+                        if email in uuid_dict:
+                            uuid = uuid_dict[email]  # Correctly match by email
+                            # Process the client and uuid data here...
+                            if client["enable"] == True:
+                                raw_email = client["email"]
+                                email = contains_non_english(client["email"])
                             if email:
                                 raw_email = transliterate_basic(client["email"])
                             raw_email = validate_username(raw_email)
@@ -183,6 +189,8 @@ def get_x_inbounds_with_uuid(session):
                             with open('log.txt', 'a+') as file:
                                 log_text = f'User {client["email"]} skipped due to usedtraffic more than allowed or expired date: {int((client["up"] + client["down"]) / 1024 / 1024 / 1024)}GB , {client["total"] / 1024 / 1024 / 1024}GB\n'
                                 file.write(log_text)
+                        else:
+                            print(f"Warning: No UUID found for email {email}")
                     
                 # Return the list of user data for later use
                 return users
