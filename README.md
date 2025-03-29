@@ -73,12 +73,5 @@ pip install -r requirements.txt
 # Run the Script
 python main.py
 ```
-# Support This Project
 
-If you find my GitHub repository helpful and would like to support my work, you can make a donation using the following cryptocurrencies:
-
-- **USDT (TRC20):** TPXehJNLDqhHBAfs6v5KKHKXX4fZ3uhVGK
-- **TRX (TRC20):** TPXehJNLDqhHBAfs6v5KKHKXX4fZ3uhVGK
-
-Your contributions are greatly appreciated and will help me continue developing and maintaining this project. Thank you for your support! 🙌
 
