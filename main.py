@@ -173,7 +173,7 @@ def get_x_inbounds_with_uuid(session):
                             total = client["total"]
                             protocol = inbound.get("protocol")
                             expiry_time = milliseconds_to_seconds(client["expiryTime"])
-                            uuid_result = uuid["id"]
+                            uuid_result = uuid.get("id") or uuid.get("uuid") or uuid.get("uid")
                             # Check if used_traffic is greater than total
                             if used_traffic <= total and total > 0:
                                 last_value = total - (used_traffic)
