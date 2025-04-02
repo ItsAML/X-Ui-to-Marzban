@@ -480,61 +480,103 @@ if __name__ == "__main__":
                             # Handle the possibility of missing protocols
                             vmess_inbounds = []
                             while True:
-                                print("VMESS inbound names. (You Can Type '/' To Select All)")
-                                available_inbounds = ", ".join(custom_protocols.get("vmess", []))
-                                print("Available Inbounds:", available_inbounds or "No Inbounds Found")
-                                vmess_input = input("Enter Inbound Name: (Press Enter While Empty To Skip)")
+                                print(
+                                    "VMESS inbound names. (You Can Type '/' To Select All)")
+                                available_inbounds = ", ".join(
+                                    custom_protocols.get("vmess", []))
+                                print("Available Inbounds:",
+                                      available_inbounds or "No Inbounds Found")
+                                vmess_input = input(
+                                    "Enter Inbound Name: (Press Enter While Empty To Skip)")
                                 if vmess_input:
                                     if vmess_input == "/":
-                                        vmess_inbounds.extend(custom_protocols.get("vmess", []))
+                                        vmess_inbounds.extend(
+                                            custom_protocols.get("vmess", []))
                                         break
-                                    else:
+                                    elif vmess_input in custom_protocols.get(
+                                            "vmess", []):
                                         vmess_inbounds.append(vmess_input)
+                                        break  # Exit the loop if a valid inbound name is entered
+                                    else:
+                                        print(
+                                            "Invalid inbound name. Please enter a name from the available list.")
                                 else:
                                     break
 
                             vless_inbounds = []
                             while True:
-                                print("VLESS inbound names. (You Can Type '/' To Select All)")
-                                available_inbounds = ", ".join(custom_protocols.get("vless", []))
-                                print("Available Inbounds:", available_inbounds or "No Inbounds Found")
-                                vless_input = input("Enter Inbound Name: (Press Enter While Empty To Skip)")
+                                print(
+                                    "VLESS inbound names. (You Can Type '/' To Select All)")
+                                available_inbounds = ", ".join(
+                                    custom_protocols.get("vless", []))
+                                print("Available Inbounds:",
+                                      available_inbounds or "No Inbounds Found")
+                                vless_input = input(
+                                    "Enter Inbound Name: (Press Enter While Empty To Skip)")
                                 if vless_input:
                                     if vless_input == "/":
-                                        vless_inbounds.extend(custom_protocols.get("vless", []))
+                                        vless_inbounds.extend(
+                                            custom_protocols.get("vless", []))
                                         break
-                                    else:
+                                    elif vless_input in custom_protocols.get(
+                                            "vless", []):
                                         vless_inbounds.append(vless_input)
+                                        break  # Exit the loop if a valid inbound name is entered
+                                    else:
+                                        print(
+                                            "Invalid inbound name. Please enter a name from the available list.")
                                 else:
                                     break
 
                             trojan_inbounds = []
                             while True:
-                                print("TROJAN inbound names. (You Can Type '/' To Select All)")
-                                available_inbounds = ", ".join(custom_protocols.get("trojan", []))
-                                print("Available Inbounds:", available_inbounds or "No Inbounds Found")
-                                trojan_input = input("Enter Inbound Name: (Press Enter While Empty To Skip)")
+                                print(
+                                    "TROJAN inbound names. (You Can Type '/' To Select All)")
+                                available_inbounds = ", ".join(
+                                    custom_protocols.get("trojan", []))
+                                print("Available Inbounds:",
+                                      available_inbounds or "No Inbounds Found")
+                                trojan_input = input(
+                                    "Enter Inbound Name: (Press Enter While Empty To Skip)")
                                 if trojan_input:
                                     if trojan_input == "/":
-                                        trojan_inbounds.extend(custom_protocols.get("trojan", []))
+                                        trojan_inbounds.extend(
+                                            custom_protocols.get("trojan", []))
                                         break
-                                    else:
+                                    elif trojan_input in custom_protocols.get(
+                                            "trojan", []):
                                         trojan_inbounds.append(trojan_input)
+                                        break  # Exit the loop if a valid inbound name is entered
+                                    else:
+                                        print(
+                                            "Invalid inbound name. Please enter a name from the available list.")
                                 else:
                                     break
 
                             shadowsocks_inbounds = []
                             while True:
-                                print("SHADOWSOCKS inbound names. (You Can Type '/' To Select All)")
-                                available_inbounds = ", ".join(custom_protocols.get("shadowsocks", []))
-                                print("Available Inbounds:", available_inbounds or "No Inbounds Found")
-                                shadowsocks_input = input("Enter Inbound Name: (Press Enter While Empty To Skip)")
+                                print(
+                                    "SHADOWSOCKS inbound names. (You Can Type '/' To Select All)")
+                                available_inbounds = ", ".join(
+                                    custom_protocols.get("shadowsocks", []))
+                                print("Available Inbounds:",
+                                      available_inbounds or "No Inbounds Found")
+                                shadowsocks_input = input(
+                                    "Enter Inbound Name: (Press Enter While Empty To Skip)")
                                 if shadowsocks_input:
                                     if shadowsocks_input == "/":
-                                        shadowsocks_inbounds.extend(custom_protocols.get("shadowsocks", []))
+                                        shadowsocks_inbounds.extend(
+                                            custom_protocols.get("shadowsocks",
+                                                                 []))
                                         break
+                                    elif shadowsocks_input in custom_protocols.get(
+                                            "shadowsocks", []):
+                                        shadowsocks_inbounds.append(
+                                            shadowsocks_input)
+                                        break  # Exit the loop if a valid inbound name is entered
                                     else:
-                                        shadowsocks_inbounds.append(shadowsocks_input)
+                                        print(
+                                            "Invalid inbound name. Please enter a name from the available list.")
                                 else:
                                     break
                             while True:
